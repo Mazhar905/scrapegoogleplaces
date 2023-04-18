@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import pandas as pd
 from exportData import ExportDataMaps
 from maps_data_scraper import GoogleMapsDataScraper
 from threading import Thread
@@ -9,15 +10,11 @@ import os
 
 
 def split_list(a, n):
-    # print("a and n", a, n)
-    # a = ["Liam's restaurant San Francisco", 'Toronto Ontario Canada'], n = 5
     k, m = divmod(len(a), n)
-    # print(k, m) (0, 2)
     return list((a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n)))
 
 
 def scraperMaps(list, results, thread):
-    # print(list, results, threads)
     scraper = GoogleMapsDataScraper()
     scraper.initDriver()
 
@@ -38,14 +35,12 @@ def scraperMaps(list, results, thread):
     results[thread] = listPlaces
 
 
-def mainGoogleMaps(filePath):
-    with open(filePath, 'r', encoding='utf-8') as archive:
-        listF = archive.read().splitlines()
+def mainGoogleMaps(keywords):
 
     threads = 1
     listthreads = [None] * threads
     listresults = [None] * threads
-    divided = split_list(listF, threads)
+    divided = split_list(keywords, threads)
     # print("divided", divided)
     for i in range(len(listthreads)):
         listthreads[i] = Thread(target=scraperMaps, args=(
@@ -65,7 +60,7 @@ def mainGoogleMaps(filePath):
 
 if __name__ == "__main__":
     while True:
-        filePath = "/home/mazhar/Documents/scrap_google_places/google_maps_scraper/test.txt"
+        filePath = "./test.txt"
 
         # filePath = input(
         # '----------\n[3] Introduce the path of the keywords txt file: ')
@@ -76,4 +71,27 @@ if __name__ == "__main__":
         else:
             break
 
-    mainGoogleMaps(filePath)
+    # Read the CSV file using pandas and extract the columns we need
+    data = pd.read_csv('canadacities.csv', usecols=['city', 'province_id'])
+
+    # Generate the list of search keywords
+    keywords = []
+
+    with open(filePath, 'r', encoding='utf-8') as archive:
+        listF = archive.read().splitlines()
+    for j in range(len(listF)):
+        for i in range(len(data)):
+            city = data.iloc[i][0]
+            province = data.iloc[i][1]
+            kw = listF[j]
+            keyword = f"{kw} in {city}, {province}, canada"
+            keywords.append(keyword)
+
+    # Print the list of search keywords
+    # print(len(keywords))
+
+    # print(type(listF))
+    # print(len(listF))
+    # print(len(keywords)/5)  # 1738
+
+    mainGoogleMaps(keywords)

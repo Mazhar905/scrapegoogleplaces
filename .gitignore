@@ -8,3 +8,5 @@ test.txt
 __pycache__/*
 utils.py
 .git/*
+ResultOutput.xlsx
+csvdata.py

@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from selenium.common.exceptions import StaleElementReferenceException
 import random
 import time
 import urllib.request
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.chrome import ChromeDriverManager as CM
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager as CM
 from selenium.webdriver.support import expected_conditions as EC
-
-from placesMaps import placeMaps
 
 
 class GoogleMapsDataScraper:
@@ -51,7 +47,10 @@ class GoogleMapsDataScraper:
                   "Address": "//button[@data-item-id='address']/div/div[3]/div[1]",
                   "Hours": "//div[@role='button'][@tabindex = '0']/div/div/span/span/span",
                   "Website": "//a[@data-item-id='authority']/div/div[3]/div[1]",
-                  "Phone": "//button[@data-tooltip='Copy phone number']/div/div[3]/div[1]"}
+                  "Phone": "//button[@data-tooltip='Copy phone number']/div/div[3]/div[1]",
+                  #   "langitude": "",
+                  #   "longitude": ""
+                  }
 
         elements = {}
         for key, xpath in xpaths.items():
@@ -85,9 +84,6 @@ class GoogleMapsDataScraper:
     def scraperData(self, kw):
         try:
             print(kw)
-            place = placeMaps()
-            print("scraperData", place)
-            # place.keyword = kw
             if (self.errorCont == 5):
                 self.errorCont = 0
                 time.sleep(1)
@@ -132,7 +128,7 @@ class GoogleMapsDataScraper:
                     "return arguments[0].scrollHeight;", div)
 
                 # If the new height is the same as the last height, all content has loaded
-                if new_height == last_height or len(lst) >= 50:
+                if new_height == last_height or len(lst) >= 100:
                     break
 
                 # Otherwise, update the last height and continue scrolling
