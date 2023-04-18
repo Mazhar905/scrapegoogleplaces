@@ -1,0 +1,10 @@
+New/*
+venv/*
+Places locations.xlsx
+canadacities.csv
+canadacities.xlsx
+test.txt
+.vscode/*
+__pycache__/*
+utils.py
+.git/*
