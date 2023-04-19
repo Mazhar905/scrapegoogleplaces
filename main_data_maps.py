@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
+import logger
+import logging
 import pandas as pd
 from exportData import ExportDataMaps
 from maps_data_scraper import GoogleMapsDataScraper
@@ -24,28 +26,28 @@ def scraperMaps(list, results, thread):
         # here we return the dictionories
         Place = scraper.scraperData(l)
         if (Place != None):
-            print('Thread # '+str(thread)+' ' + str(count) +
-                  '/' + str(len(list)) + ' - OK - ' + l)
+            logger.error(f'Thread # {thread} {count}/{len(list)} - OK - {l}')
             listPlaces.append(Place)
         else:
-            print('Thread # '+str(thread)+' ' + str(count) +
-                  '/' + str(len(list)) + ' - ERROR - ' + l)
+            logger.info(
+                f'Thread # {thread} {count}/{len(list)} - ERROR - {l}')
             count += 1
 
     results[thread] = listPlaces
 
 
 def mainGoogleMaps(keywords):
-
     threads = 1
     listthreads = [None] * threads
     listresults = [None] * threads
     divided = split_list(keywords, threads)
-    # print("divided", divided)
-    for i in range(len(listthreads)):
-        listthreads[i] = Thread(target=scraperMaps, args=(
-            divided[i], listresults, i,))
-        listthreads[i].start()
+    try:
+        for i in range(len(listthreads)):
+            listthreads[i] = Thread(target=scraperMaps, args=(
+                divided[i], listresults, i,))
+            listthreads[i].start()
+    except Exception as e:
+        logger.exception("Exception occurred", exc_info=True)
 
     for i in range(len(listthreads)):
         listthreads[i].join()
@@ -54,6 +56,7 @@ def mainGoogleMaps(keywords):
 
     for i in range(len(listresults)):
         listFinal = listFinal + listresults[i]
+
     export = ExportDataMaps('ResultOutput.xlsx', '', listFinal)
     export.exportExcel()
 
@@ -71,27 +74,20 @@ if __name__ == "__main__":
         else:
             break
 
-    # Read the CSV file using pandas and extract the columns we need
-    data = pd.read_csv('canadacities.csv', usecols=['city', 'province_id'])
+    # # Read the CSV file using pandas and extract the columns we need
+    # data = pd.read_csv('canadacities.csv', usecols=['city', 'province_id'])
 
-    # Generate the list of search keywords
-    keywords = []
+    # # Generate the list of search keywords
+    # keywords = []
 
     with open(filePath, 'r', encoding='utf-8') as archive:
         listF = archive.read().splitlines()
-    for j in range(len(listF)):
-        for i in range(len(data)):
-            city = data.iloc[i][0]
-            province = data.iloc[i][1]
-            kw = listF[j]
-            keyword = f"{kw} in {city}, {province}, canada"
-            keywords.append(keyword)
+    # for j in range(len(listF)):
+    #     for i in range(len(data)):
+    #         city = data.iloc[i][0]
+    #         province = data.iloc[i][1]
+    #         kw = listF[j]
+    #         keyword = f"{kw} in {city}, {province}, canada"
+    #         keywords.append(keyword)
 
-    # Print the list of search keywords
-    # print(len(keywords))
-
-    # print(type(listF))
-    # print(len(listF))
-    # print(len(keywords)/5)  # 1738
-
-    mainGoogleMaps(keywords)
+    mainGoogleMaps(listF)

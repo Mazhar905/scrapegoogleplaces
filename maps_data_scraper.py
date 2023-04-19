@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+import logger
+import logging
 import random
 import time
 import urllib.request
@@ -11,17 +12,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+mylogger = logger.MyLogger().get_logger()
+
 
 class GoogleMapsDataScraper:
 
     def __init__(self):
         self.driver = None
         self.errorCont = 0
+        # define an explicit wait with a timeout of 10 seconds
+        self.wait = WebDriverWait(self.driver, 10)
+        self.log = mylogger
 
     def initDriver(self):
         try:
             chrome_options = webdriver.ChromeOptions()
-            chrome_options.add_argument('--headless')
+            # chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument('--log-level=3')
@@ -30,12 +36,11 @@ class GoogleMapsDataScraper:
             self.driver = webdriver.Chrome(
                 executable_path=CM().install(), options=chrome_options)
             self.driver.get('https://www.google.com/maps/')
-            print(
-                "----------\n** Greetings ** Our Driver has intialies successfully.\n")
+            self.log.info("Driver initialized successfully.")
             return True
         except Exception as e:
-            print('Error with the Chrome Driver')
-            print(e)
+            self.log.exception("Exception occurred", exc_info=True)
+            # print(e)
             return False
 
     def fetch_data(self, name):
@@ -52,16 +57,21 @@ class GoogleMapsDataScraper:
                   #   "longitude": ""
                   }
 
+        # locate the div element using a CSS selector
+        main_div = self.driver.find_element(
+            By.XPATH, f"//div[ @tabindex = '-1']/div/div[@role ='main'][@aria-label= '{name}']/div[2][@class ='0.tabindex']")
+
         elements = {}
         for key, xpath in xpaths.items():
             try:
                 time.sleep(2)
-                element = self.driver.find_element(By.XPATH, xpath)
+                element = main_div.find_element(By.XPATH, xpath)
                 elements[key] = element.text
 
             except Exception as e:
                 # print(e)
-                print(f"{key} Element not found of {name}.")
+                self.log.warning(f"{key} element not found for {name}.")
+                self.log.exception("Exception occurred", exc_info=True)
                 elements[key] = None
 
         # if elements['Hours'] == None:
@@ -83,27 +93,21 @@ class GoogleMapsDataScraper:
 
     def scraperData(self, kw):
         try:
-            print(kw)
-            if (self.errorCont == 5):
-                self.errorCont = 0
-                time.sleep(1)
-                self.driver.get('https://www.google.com/maps/')
-                time.sleep(2)
+            self.log.info(f"Starting scraper for keyword: {kw}")
             time.sleep(3)
             inputBox = WebDriverWait(self.driver, 20).until(
                 EC.element_to_be_clickable((By.XPATH, '//*[@id="searchboxinput"]')))
             inputBox.click()
             inputBox.clear()
-            # inputBox.click()
             time.sleep(1)
             inputBox.send_keys(kw)
-            # time.sleep(1)
             inputBox.send_keys(Keys.ENTER)
             time.sleep(5)
+            print("we have get the div ")
             # Find the div element you want to scroll
             div = self.driver.find_element(
                 By.XPATH, "//div[@role= 'feed'][@tabindex = '-1']")
-
+            print("we have get the div ")
             # Get the initial height of the scrollable element
             last_height = self.driver.execute_script(
                 "return arguments[0].scrollHeight;", div)
@@ -136,24 +140,27 @@ class GoogleMapsDataScraper:
                 print(len(lst))
 
             # Get the HTML content of the entire scrollable element
+            time.sleep(5)
             div = self.driver.find_element(
-                By.XPATH, "// div[@role='feed'][@tabindex= '-1']")
-            print(lst)
+                By.XPATH, "//div[@role= 'feed'][@tabindex = '-1']")
+            self.log.info(f'Get {len(lst)} value in list on this {kw}')
+            # print(lst)
             data = {}
             # Iterate over the child div elements of the parent div
             for child_div in div.find_elements(By.XPATH, "//div[@role = 'article']/a"):
                 name = child_div.get_attribute('aria-label')
                 # print(data)
                 child_div.click()
-
                 data[name] = self.fetch_data(name)
 
             print(data)
             return data
         except Exception as e:
-            print(e)
-            # self.errorCont += 1
+            self.log.error(
+                'Error occurred while scraping for keyword {}: {}'.format(kw, str(e)))
+            self.errorCont += 1
             return None
 
     def endDriver(self):
+        self.log.info('Quitting the driver...')
         self.driver.quit()

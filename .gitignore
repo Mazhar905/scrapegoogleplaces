@@ -1,12 +1,12 @@
 New/*
 venv/*
+.git/*
+.vscode/*
+__pycache__/*
 Places locations.xlsx
 canadacities.csv
 canadacities.xlsx
 test.txt
-.vscode/*
-__pycache__/*
 utils.py
-.git/*
 ResultOutput.xlsx
-csvdata.py
+*.log
