@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-
-
-import logger
-import logging
-import pandas as pd
+import mylogger
+# import pandas as pd
 from exportData import ExportDataMaps
 from maps_data_scraper import GoogleMapsDataScraper
 from threading import Thread
 import sys
 import os
+logger = mylogger.MyLogger().get_logger()
 
 
 def split_list(a, n):
@@ -24,6 +22,7 @@ def scraperMaps(list, results, thread):
     count = 1
     for l in list:
         # here we return the dictionories
+        # Place = data
         Place = scraper.scraperData(l)
         if (Place != None):
             logger.error(f'Thread # {thread} {count}/{len(list)} - OK - {l}')

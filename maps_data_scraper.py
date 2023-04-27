@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import logger
-import logging
-import random
+import mylogger
 import time
-import urllib.request
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager as CM
@@ -13,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 
-mylogger = logger.MyLogger().get_logger()
+logger = mylogger.MyLogger().get_logger()
 
 
 class GoogleMapsDataScraper:
@@ -23,7 +20,7 @@ class GoogleMapsDataScraper:
         self.errorCont = 0
         # define an explicit wait with a timeout of 10 seconds
         self.wait = WebDriverWait(self.driver, 10)
-        self.log = mylogger
+        self.log = logger
 
     def initDriver(self):
         try:
@@ -70,14 +67,15 @@ class GoogleMapsDataScraper:
                             try:
                                 element = self.driver.find_element(By.XPATH, i)
                                 category_text = element.text
-                                self.logger.info(f"Getting {key} value from this  and the category is {category_text}.")
-                                break
+                                self.log.info(f"{key} value of {name} found from this xpath and the {key} is {category_text}.")
+                                if category_text is not None:
+                                    break
                             except NoSuchElementException:
-                                self.logger.info(f"Element not found with the current xapth, continue with the next xpath.")
+                                self.log.info(f"Element not found with the current xapth, continue with the next xpath.")
                                 continue
                         elements[key] = category_text
-                        if hours_text is None:
-                            self.logger.warning(f"{key} element not found for {name}.")
+                        if category_text is None:
+                            self.log.warning(f"{key} element not found for {name}.")
 
                     # code for getting hours value
                     elif key == "Hours":
@@ -91,22 +89,26 @@ class GoogleMapsDataScraper:
                                     self.driver.find_element(By.XPATH, "//div[@role='button'][@tabindex = '0']/div/div/span/span/span").click()
                                     ele =self.driver.find_element(By.XPATH, "//table/tbody/tr[1]/td[2]/ul/li")
                                     hours_text = ele.text
-                                logger.info(f"Getting {key} value from this {j} and the category is {hours_text}.")
-                                break
+                                self.log.info(f"{key} value of {name} found from this xpath and the {key} is {hours_text}.")
+                                if hours_text is not None:
+                                    break
                             except NoSuchElementException:
-                                logger.info(f"Element not found with the current {j}, continue with the next xpath.")
+                                self.log.info(f"Element not found with the current xpath, continue with the next xpath.")
                                 continue
                         elements[key] = hours_text
                         if hours_text is None:
-                            logger.warning(f"{key} element not found for {name}.")
+                            self.log.warning(f"{key} element not found for {name}.")
                     else:
-                        element = self.driver.find_element(By.XPATH, xpath)
-                        elements[key] = element.text
-
+                        try:
+                            element = self.driver.find_element(By.XPATH, xpath)
+                            elements[key] = element.text
+                        except Exception as e:
+                            elements[key] = None
+                            self.log.warning(f"{key} value not found for {name}.")
+                            #logger.exception("Exception occurred")
                 except Exception as e:
-                    elements[key] = None
-                logger.warning(f"{key} value not found for {name}.")
-                #logger.exception("Exception occurred")
+                    self.log.warning(f"{key} value not found for {name}.")
+                    #logger.exception("Exception occurred")
 
         return elements
 
@@ -127,7 +129,6 @@ class GoogleMapsDataScraper:
             # Find the div element you want to scroll
             div = self.driver.find_element(
                 By.XPATH, "//div[@role= 'feed'][@tabindex = '-1']")
-            print("we have get the div ")
             # Get the initial height of the scrollable element
             last_height = self.driver.execute_script(
                 "return arguments[0].scrollHeight;", div)
@@ -152,7 +153,7 @@ class GoogleMapsDataScraper:
                     "return arguments[0].scrollHeight;", div)
 
                 # If the new height is the same as the last height, all content has loaded
-                if new_height == last_height or len(lst) >= 100:
+                if new_height == last_height or len(lst) >= 50:
                     break
 
                 # Otherwise, update the last height and continue scrolling
@@ -164,7 +165,7 @@ class GoogleMapsDataScraper:
             div = self.driver.find_element(
                 By.XPATH, "//div[@role= 'feed'][@tabindex = '-1']")
             self.log.info(f'Get {len(lst)} value in list on this {kw}')
-            # print(lst)
+            print(lst)
             data = {}
             # Iterate over the child div elements of the parent div
             for child_div in div.find_elements(By.XPATH, "//div[@role = 'article']/a"):

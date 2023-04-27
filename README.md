@@ -12,7 +12,7 @@ To execute this script you need to run it in the command prompt.
     python3 main_data_maps.py
     ```
 
-Then, question will appear, which are necessary to run the script:
+Then, question will appear, which are necessary to run script:
 
 
 1. You need to specify where is located the *.txt* file with the keywords to search. For example: *D:\Projects\canada\places.txt*
