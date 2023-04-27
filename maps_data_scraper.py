@@ -11,6 +11,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 
 mylogger = logger.MyLogger().get_logger()
 
@@ -45,51 +46,70 @@ class GoogleMapsDataScraper:
 
     def fetch_data(self, name):
         time.sleep(5)
-        xpaths = {"Category": "//div[@class= 'fontBodyMedium']/span/span/button",
+        xpaths = {"Category": ["//div[@class= 'fontBodyMedium']/span/span/button","//div[@class= 'fontBodyMedium dmRWX']/span/span/span/span[2]/span/span"],
                   "Title": "//h1",
                   "Rating": "//div[@class = 'fontDisplayLarge']",
                   "Description": "//button/div[2][@class ='WeS02d fontBodyMedium']/div/div[1]",
                   "Address": "//button[@data-item-id='address']/div/div[3]/div[1]",
-                  "Hours": "//div[@role='button'][@tabindex = '0']/div/div/span/span/span",
+                  "Hours": ["//div[@role='button'][@tabindex = '0']/div/div/span/span/span", "//button/div[1]/div[3]/div[2]/span",],
                   "Website": "//a[@data-item-id='authority']/div/div[3]/div[1]",
-                  "Phone": "//button[@data-tooltip='Copy phone number']/div/div[3]/div[1]",
+                  "Phone": "//button[@data-tooltip='Copy phone number']/div/div[3]/div[1]"
                   #   "langitude": "",
                   #   "longitude": ""
                   }
 
-        # locate the div element using a CSS selector
-        main_div = self.driver.find_element(
-            By.XPATH, f"//div[ @tabindex = '-1']/div/div[@role ='main'][@aria-label= '{name}']/div[2][@class ='0.tabindex']")
-
         elements = {}
         for key, xpath in xpaths.items():
-            try:
-                time.sleep(2)
-                element = main_div.find_element(By.XPATH, xpath)
-                elements[key] = element.text
+                time.sleep(5)
+                try:
+                    time.sleep(2)
+                    # code for getting category value
+                    if key == "Category":
+                        category_text = None
+                        for i in xpath:
+                            try:
+                                element = self.driver.find_element(By.XPATH, i)
+                                category_text = element.text
+                                self.logger.info(f"Getting {key} value from this  and the category is {category_text}.")
+                                break
+                            except NoSuchElementException:
+                                self.logger.info(f"Element not found with the current xapth, continue with the next xpath.")
+                                continue
+                        elements[key] = category_text
+                        if hours_text is None:
+                            self.logger.warning(f"{key} element not found for {name}.")
 
-            except Exception as e:
-                # print(e)
-                self.log.warning(f"{key} element not found for {name}.")
-                self.log.exception("Exception occurred", exc_info=True)
-                elements[key] = None
+                    # code for getting hours value
+                    elif key == "Hours":
+                        hours_text = None
+                        for j in xpath:
+                            try:
+                                element = self.driver.find_element(By.XPATH, j)
+                                hours_text = element.text
 
-        # if elements['Hours'] == None:
-        #     if elements['Hours'] != 'Open 24 hours':
-        #         self.driver.find_element(
-        #             By.XPATH, "//div[@role='button'][@tabindex = '0']/div/div/span/span/span").click()
-        #         element = self.driver.find_element(
-        #             By.XPATH, "//table/tbody/tr[1]/td[2]/ul/li")
-        #         # print("I;m ther")
-        #         elements[key] = element.text
+                                if hours_text != "Open 24 hours":
+                                    self.driver.find_element(By.XPATH, "//div[@role='button'][@tabindex = '0']/div/div/span/span/span").click()
+                                    ele =self.driver.find_element(By.XPATH, "//table/tbody/tr[1]/td[2]/ul/li")
+                                    hours_text = ele.text
+                                logger.info(f"Getting {key} value from this {j} and the category is {hours_text}.")
+                                break
+                            except NoSuchElementException:
+                                logger.info(f"Element not found with the current {j}, continue with the next xpath.")
+                                continue
+                        elements[key] = hours_text
+                        if hours_text is None:
+                            logger.warning(f"{key} element not found for {name}.")
+                    else:
+                        element = self.driver.find_element(By.XPATH, xpath)
+                        elements[key] = element.text
 
-        #     if elements['Hours'] == 'None':
-        #         element = self.driver.find_element(
-        #             By.XPATH, "//button/div[1]/div[3]/div[2]/span")
-        #         print("Did you visit here")
-        #         elements[key] = element.text
+                except Exception as e:
+                    elements[key] = None
+                logger.warning(f"{key} value not found for {name}.")
+                #logger.exception("Exception occurred")
 
         return elements
+
 
     def scraperData(self, kw):
         try:
