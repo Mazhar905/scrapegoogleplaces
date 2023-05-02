@@ -153,7 +153,7 @@ class GoogleMapsDataScraper:
                     "return arguments[0].scrollHeight;", div)
 
                 # If the new height is the same as the last height, all content has loaded
-                if new_height == last_height or len(lst) >= 50:
+                if new_height == last_height or len(lst) >= 10:
                     break
 
                 # Otherwise, update the last height and continue scrolling
