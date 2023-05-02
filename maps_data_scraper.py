@@ -42,7 +42,6 @@ class GoogleMapsDataScraper:
             return False
 
     def fetch_data(self, name):
-        time.sleep(5)
         xpaths = {"Category": ["//div[@class= 'fontBodyMedium']/span/span/button","//div[@class= 'fontBodyMedium dmRWX']/span/span/span/span[2]/span/span"],
                   "Title": "//h1",
                   "Rating": "//div[@class = 'fontDisplayLarge']",
@@ -57,9 +56,7 @@ class GoogleMapsDataScraper:
 
         elements = {}
         for key, xpath in xpaths.items():
-                time.sleep(5)
                 try:
-                    time.sleep(2)
                     # code for getting category value
                     if key == "Category":
                         category_text = None
@@ -116,15 +113,12 @@ class GoogleMapsDataScraper:
     def scraperData(self, kw):
         try:
             self.log.info(f"Starting scraper for keyword: {kw}")
-            time.sleep(3)
             inputBox = WebDriverWait(self.driver, 20).until(
                 EC.element_to_be_clickable((By.XPATH, '//*[@id="searchboxinput"]')))
             inputBox.click()
             inputBox.clear()
-            time.sleep(1)
             inputBox.send_keys(kw)
             inputBox.send_keys(Keys.ENTER)
-            time.sleep(5)
             print("we have get the div ")
             # Find the div element you want to scroll
             div = self.driver.find_element(
@@ -140,7 +134,6 @@ class GoogleMapsDataScraper:
                     "arguments[0].scrollTop = arguments[0].scrollHeight;", div)
 
                 # Wait for the page to load
-                time.sleep(2)
                 div = self.driver.find_element(
                     By.XPATH, "// div[@role='feed'][@tabindex= '-1']")
                 lst = []
@@ -158,14 +151,13 @@ class GoogleMapsDataScraper:
 
                 # Otherwise, update the last height and continue scrolling
                 last_height = new_height
-                print(len(lst))
+                # print(len(lst))
 
             # Get the HTML content of the entire scrollable element
-            time.sleep(5)
             div = self.driver.find_element(
                 By.XPATH, "//div[@role= 'feed'][@tabindex = '-1']")
             self.log.info(f'Get {len(lst)} value in list on this {kw}')
-            print(lst)
+            # print(lst)
             data = {}
             # Iterate over the child div elements of the parent div
             for child_div in div.find_elements(By.XPATH, "//div[@role = 'article']/a"):
@@ -173,8 +165,7 @@ class GoogleMapsDataScraper:
                 # print(data)
                 child_div.click()
                 data[name] = self.fetch_data(name)
-
-            print(data)
+            # print(data)
             return data
         except Exception as e:
             self.log.error(

@@ -22,7 +22,6 @@ def scraperMaps(list, results, thread):
     count = 1
     for l in list:
         # here we return the dictionories
-        # Place = data
         Place = scraper.scraperData(l)
         if (Place != None):
             logger.error(f'Thread # {thread} {count}/{len(list)} - OK - {l}')
