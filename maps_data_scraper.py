@@ -25,7 +25,7 @@ class GoogleMapsDataScraper:
     def initDriver(self):
         try:
             chrome_options = webdriver.ChromeOptions()
-            # chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument('--log-level=3')
@@ -42,12 +42,13 @@ class GoogleMapsDataScraper:
             return False
 
     def fetch_data(self, name):
+        time.sleep(5)
         xpaths = {"Category": ["//div[@class= 'fontBodyMedium']/span/span/button","//div[@class= 'fontBodyMedium dmRWX']/span/span/span/span[2]/span/span"],
                   "Title": "//h1",
                   "Rating": "//div[@class = 'fontDisplayLarge']",
                   "Description": "//button/div[2][@class ='WeS02d fontBodyMedium']/div/div[1]",
                   "Address": "//button[@data-item-id='address']/div/div[3]/div[1]",
-                  "Hours": ["//div[@role='button'][@tabindex = '0']/div/div/span/span/span", "//button/div[1]/div[3]/div[2]/span",],
+                  "Hours": ["//div[@role='button'][@tabindex = '0']/div/div/span/span/span", "//button[@aria-label='Open 24 hours · See more hours']/div[1]/div[3]/div[1]/span",],
                   "Website": "//a[@data-item-id='authority']/div/div[3]/div[1]",
                   "Phone": "//button[@data-tooltip='Copy phone number']/div/div[3]/div[1]"
                   #   "langitude": "",
@@ -56,7 +57,9 @@ class GoogleMapsDataScraper:
 
         elements = {}
         for key, xpath in xpaths.items():
+                time.sleep(5)
                 try:
+                    time.sleep(2)
                     # code for getting category value
                     if key == "Category":
                         category_text = None
@@ -64,11 +67,11 @@ class GoogleMapsDataScraper:
                             try:
                                 element = self.driver.find_element(By.XPATH, i)
                                 category_text = element.text
-                                self.log.info(f"{key} value of {name} found from this xpath and the {key} is {category_text}.")
+                                # self.log.info(f"{key} value of {name} found from this xpath and the {key} is {category_text}.")
                                 if category_text is not None:
                                     break
                             except NoSuchElementException:
-                                self.log.info(f"Element not found with the current xapth, continue with the next xpath.")
+                                self.log.info(f"{key} not found with the current xapth, continue with the next xpath.")
                                 continue
                         elements[key] = category_text
                         if category_text is None:
@@ -82,15 +85,15 @@ class GoogleMapsDataScraper:
                                 element = self.driver.find_element(By.XPATH, j)
                                 hours_text = element.text
 
-                                if hours_text != "Open 24 hours":
+                                if hours_text != "Open 24 hours" and hours_text is not None:
                                     self.driver.find_element(By.XPATH, "//div[@role='button'][@tabindex = '0']/div/div/span/span/span").click()
                                     ele =self.driver.find_element(By.XPATH, "//table/tbody/tr[1]/td[2]/ul/li")
                                     hours_text = ele.text
-                                self.log.info(f"{key} value of {name} found from this xpath and the {key} is {hours_text}.")
+                                # self.log.info(f"{key} value of {name} found from this xpath and the {key} is {hours_text}.")
                                 if hours_text is not None:
                                     break
                             except NoSuchElementException:
-                                self.log.info(f"Element not found with the current xpath, continue with the next xpath.")
+                                self.log.info(f"{key} not found with the current xpath, continue with the next xpath.")
                                 continue
                         elements[key] = hours_text
                         if hours_text is None:
@@ -99,12 +102,14 @@ class GoogleMapsDataScraper:
                         try:
                             element = self.driver.find_element(By.XPATH, xpath)
                             elements[key] = element.text
-                        except Exception as e:
+                        except NoSuchElementException:
                             elements[key] = None
                             self.log.warning(f"{key} value not found for {name}.")
+                            continue
                             #logger.exception("Exception occurred")
                 except Exception as e:
                     self.log.warning(f"{key} value not found for {name}.")
+                    continue
                     #logger.exception("Exception occurred")
 
         return elements
@@ -113,13 +118,15 @@ class GoogleMapsDataScraper:
     def scraperData(self, kw):
         try:
             self.log.info(f"Starting scraper for keyword: {kw}")
+            time.sleep(3)
             inputBox = WebDriverWait(self.driver, 20).until(
                 EC.element_to_be_clickable((By.XPATH, '//*[@id="searchboxinput"]')))
             inputBox.click()
             inputBox.clear()
+            time.sleep(1)
             inputBox.send_keys(kw)
             inputBox.send_keys(Keys.ENTER)
-            print("we have get the div ")
+            time.sleep(5)
             # Find the div element you want to scroll
             div = self.driver.find_element(
                 By.XPATH, "//div[@role= 'feed'][@tabindex = '-1']")
@@ -134,6 +141,7 @@ class GoogleMapsDataScraper:
                     "arguments[0].scrollTop = arguments[0].scrollHeight;", div)
 
                 # Wait for the page to load
+                time.sleep(2)
                 div = self.driver.find_element(
                     By.XPATH, "// div[@role='feed'][@tabindex= '-1']")
                 lst = []
@@ -154,10 +162,11 @@ class GoogleMapsDataScraper:
                 # print(len(lst))
 
             # Get the HTML content of the entire scrollable element
+            time.sleep(5)
             div = self.driver.find_element(
                 By.XPATH, "//div[@role= 'feed'][@tabindex = '-1']")
             self.log.info(f'Get {len(lst)} value in list on this {kw}')
-            # print(lst)
+            print(lst)
             data = {}
             # Iterate over the child div elements of the parent div
             for child_div in div.find_elements(By.XPATH, "//div[@role = 'article']/a"):
@@ -165,7 +174,8 @@ class GoogleMapsDataScraper:
                 # print(data)
                 child_div.click()
                 data[name] = self.fetch_data(name)
-            # print(data)
+
+            print(data)
             return data
         except Exception as e:
             self.log.error(
