@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from exportData import ExportDataMaps
 import mylogger
 import time
 from selenium import webdriver
@@ -25,7 +26,7 @@ class GoogleMapsDataScraper:
     def initDriver(self):
         try:
             chrome_options = webdriver.ChromeOptions()
-            chrome_options.add_argument('--headless')
+            # chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument('--log-level=3')
@@ -41,7 +42,7 @@ class GoogleMapsDataScraper:
             # print(e)
             return False
 
-    def fetch_data(self, name, para):
+    def fetch_data(self, name, para, filename):
         time.sleep(5)
         xpaths = {"Category": ["//div[@class= 'fontBodyMedium']/span/span/button","//div[@class= 'fontBodyMedium dmRWX']/span/span/span/span[2]/span/span"],
                   "Title": "//h1",
@@ -54,24 +55,23 @@ class GoogleMapsDataScraper:
                   #   "langitude": "",
                   #   "longitude": ""
                   }
-        
         new_dict = {}
         for key in xpaths.keys():
             if key in para:
-                new_dict[key] = [xpaths[key]]
+                new_dict[key] = xpaths[key]
                 
-        print(new_dict)
 
         elements = {}
-        for key, xpath in xpaths.items():
+        for key, xpath in new_dict.items():
                 time.sleep(5)
                 try:
-                    time.sleep(2)
+                    time.sleep(5)
                     # code for getting category value
                     if key == "Category":
                         category_text = None
                         for i in xpath:
                             try:
+                                time.sleep(1)
                                 element = self.driver.find_element(By.XPATH, i)
                                 category_text = element.text
                                 # self.log.info(f"{key} value of {name} found from this xpath and the {key} is {category_text}.")
@@ -91,7 +91,7 @@ class GoogleMapsDataScraper:
                             try:
                                 element = self.driver.find_element(By.XPATH, j)
                                 hours_text = element.text
-
+                                time.sleep(1)
                                 if hours_text != "Open 24 hours" and hours_text is not None:
                                     self.driver.find_element(By.XPATH, "//div[@role='button'][@tabindex = '0']/div/div/span/span/span").click()
                                     ele =self.driver.find_element(By.XPATH, "//table/tbody/tr[1]/td[2]/ul/li")
@@ -107,6 +107,7 @@ class GoogleMapsDataScraper:
                             self.log.warning(f"{key} element not found for {name}.")
                     else:
                         try:
+                            time.sleep(1)
                             element = self.driver.find_element(By.XPATH, xpath)
                             elements[key] = element.text
                         except NoSuchElementException:
@@ -119,10 +120,16 @@ class GoogleMapsDataScraper:
                     continue
                     #logger.exception("Exception occurred")
 
+        d = dict()
+        d[name]=elements
+        self.log.info(f"Element value of {name}\n-----------------------\n{d}.")
+        self.log.info(f"-----------------------\nInserting the value of {name} into excel file name is {filename}.")
+        export = ExportDataMaps(filename, para, d)
+        export.exportExcel()
         return elements
 
 
-    def scraperData(self, kw, para):
+    def scraperData(self, kw, para, filename):
         try:
             self.log.info(f"Starting scraper for keyword: {kw}")
             time.sleep(3)
@@ -180,7 +187,7 @@ class GoogleMapsDataScraper:
                 name = child_div.get_attribute('aria-label')
                 # print(data)
                 child_div.click()
-                data[name] = self.fetch_data(name, para)
+                data[name] = self.fetch_data(name, para,filename)
 
             print(data)
             return data

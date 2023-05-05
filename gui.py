@@ -77,26 +77,26 @@ class FileNameWindow:
         self.check_var4 = tk.BooleanVar()
         self.check_var5 = tk.BooleanVar()
         self.check_var6 = tk.BooleanVar()
-        self.checkbox1 = tk.Checkbutton(self.frame, text="Title", font=self.ch_font, variable=self.check_var1, bg="white"   )
-        self.checkbox2 = tk.Checkbutton(self.frame, text="Category", font=self.ch_font, variable=self.check_var2, bg="white")
-        self.checkbox3 = tk.Checkbutton(self.frame, text="Hours", font=self.ch_font, variable=self.check_var3, bg="white"   )
-        self.checkbox4 = tk.Checkbutton(self.frame, text="Website", font=self.ch_font, variable=self.check_var4, bg="white" )
+        self.check_var7 = tk.BooleanVar()
+        self.check_var8 = tk.BooleanVar()
+        self.checkbox1 = tk.Checkbutton(self.frame, text="Category", font=self.ch_font, variable=self.check_var1, bg="white")
+        self.checkbox2 = tk.Checkbutton(self.frame, text="Title", font=self.ch_font, variable=self.check_var2, bg="white"   )
+        self.checkbox3 = tk.Checkbutton(self.frame, text="Rating", font=self.ch_font, variable=self.check_var3, bg="white"   )
+        self.checkbox4 = tk.Checkbutton(self.frame, text="Description", font=self.ch_font, variable=self.check_var4, bg="white"   )
         self.checkbox5 = tk.Checkbutton(self.frame, text="Address", font=self.ch_font, variable=self.check_var5, bg="white" )
-        self.checkbox6 = tk.Checkbutton(self.frame, text="Phone", font=self.ch_font, variable=self.check_var6, bg="white"   )
+        self.checkbox6 = tk.Checkbutton(self.frame, text="Hours", font=self.ch_font, variable=self.check_var6, bg="white"   )
+        self.checkbox7 = tk.Checkbutton(self.frame, text="Website", font=self.ch_font, variable=self.check_var7, bg="white" )
+        self.checkbox8 = tk.Checkbutton(self.frame, text="Phone", font=self.ch_font, variable=self.check_var8, bg="white"   )
         self.checkbox1.pack(padx=10)
         self.checkbox2.pack(padx=10)
         self.checkbox3.pack(padx=10)
         self.checkbox4.pack(padx=10)
         self.checkbox5.pack(padx=10)
         self.checkbox6.pack(padx=10)
+        self.checkbox7.pack(padx=10)
+        self.checkbox8.pack(padx=10)
 
-        # # create the output name input field
-        # self.label_output = tk.Label(self.frame, text="Output  File name:", font=self.label_font, bg="white")
-        # self.label_output.pack(pady=10)
-        # self.entry_output = tk.Entry(self.frame, width=50)
-        # self.entry_output.pack(pady=10)
-
-        # create the file type input field
+        # create the file radio buttons field
         self.label_file_type = tk.Label(self.frame, text="Chose Output File type:", font=self.label_font, bg="white")
         self.label_file_type.pack(pady=10)
         self.file_type_var = tk.StringVar(value="XLSX")
@@ -118,9 +118,9 @@ class FileNameWindow:
         file_name = self.file_name.get()
         output_name = self.name_entry.get()
         file_type = self.file_type_var.get()
-        checkboxes = [self.check_var1.get(), self.check_var2.get(), self.check_var3.get(), self.check_var4.get(), self.check_var5.get(), self.check_var6.get()]
+        checkboxes = [self.check_var1.get(), self.check_var2.get(), self.check_var3.get(), self.check_var4.get(), self.check_var5.get(), self.check_var6.get(), self.check_var7.get(), self.check_var8.get()]
         
-        para = ["Title", "Category", "Hours", "Websites", "Address", "Phone"]
+        para = ["Category", "Title", "Rating", "Description", "Address","Hours", "Website",  "Phone"]
         dictionary = dict(zip(para, checkboxes))
         if not file_name:
             messagebox.showerror("Error", "File name cannot be empty!")
@@ -160,11 +160,11 @@ class startProgramWindow:
         # self.title("Start Program")
         # Create a Label widget to display file_path
         file_path_label = tk.Label(self.frame, text=f"File path: {self.file_path}", bg="white")
-        file_path_label.pack(pady=50)
+        file_path_label.pack(pady=30)
         
         # Create a Label widget to display output_file_name
         output_file_label = tk.Label(self.frame, text=f"Output file name: {self.file_name}", bg="white")
-        output_file_label.pack(pady=50)
+        output_file_label.pack(pady=30)
         
         # Create a Label widget to display para
         self.parameters= []
@@ -172,7 +172,7 @@ class startProgramWindow:
             if values is True:
                 self.parameters.append(keys)
         para_label = tk.Label(self.frame, text=f"Parameters: {self.parameters}", bg="white")
-        para_label.pack(pady=50)
+        para_label.pack(pady=30)
         
         # Add a Close button to the window
         self.start_button = tk.Button(self.frame, text="Start Program", font=self.btn_font, bg="#1dbf73", fg="white", width=30 ,height=1,command=self.run_program)
@@ -180,7 +180,7 @@ class startProgramWindow:
     def run_program(self):
         # Call the function from other_file
         
-        mainGoogleMaps(self.file_path, self.file_name, self.para)
+        mainGoogleMaps(self.file_path, self.file_name, self.parameters)
 
 
 input_style = {

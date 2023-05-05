@@ -41,9 +41,11 @@ class mainGoogleMaps:
 
         for i in range(len(listresults)):
             listFinal = listFinal + listresults[i]
-
-        export = ExportDataMaps(filename, parameters, listFinal)
-        export.exportExcel()
+        
+        print(listFinal)
+        # return listFinal
+        # export = ExportDataMaps(filename, parameters, listFinal)
+        # export.exportExcel()
 
     def split_list(self,a, n):
         k, m = divmod(len(a), n)
@@ -58,7 +60,7 @@ class mainGoogleMaps:
         count = 1
         for l in list:
             # here we return the dictionories
-            Place = self.scraper.scraperData(l, self.parameters)
+            Place = self.scraper.scraperData(l, self.parameters, self.filename)
             if (Place != None):
                 logger.error(f'Thread # {thread} {count}/{len(list)} - OK - {l}')
                 listPlaces.append(Place)

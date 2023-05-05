@@ -11,3 +11,5 @@ utils.py
 ResultOutput.xlsx
 *.log
 testing.py
+*.xlsx
+*.XLSX

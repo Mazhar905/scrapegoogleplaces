@@ -18,10 +18,16 @@ class ExportDataMaps:
         for i, col_name in enumerate(self.para):
              sheet.write(0, i, col_name.upper())
 
-        # Write data rows
-        for i, place in enumerate(self.placesList):
-            for j, value in enumerate(place):
-                sheet.write(i+1, j, value)
+        # Write data rows from a dictionary
+        # todo: the placesList is a dictionary
+        dic=         {'St. James Park': {'Category': 'Park', 'Title': 'St. James Park', 'Rating': '4.5', 'Phone': '+1 416-392-2489'}}
+        row = 0
+        for place, attributes in self.placesList.items():
+            col = 0
+            for key, value in attributes.items():
+                sheet.write(row+1, col, value)
+                col+=1
+            row += 1
 
         writeBook.save(self.fileName)
 
