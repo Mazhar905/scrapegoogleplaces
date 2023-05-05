@@ -41,7 +41,7 @@ class GoogleMapsDataScraper:
             # print(e)
             return False
 
-    def fetch_data(self, name):
+    def fetch_data(self, name, para):
         time.sleep(5)
         xpaths = {"Category": ["//div[@class= 'fontBodyMedium']/span/span/button","//div[@class= 'fontBodyMedium dmRWX']/span/span/span/span[2]/span/span"],
                   "Title": "//h1",
@@ -54,6 +54,13 @@ class GoogleMapsDataScraper:
                   #   "langitude": "",
                   #   "longitude": ""
                   }
+        
+        new_dict = {}
+        for key in xpaths.keys():
+            if key in para:
+                new_dict[key] = [xpaths[key]]
+                
+        print(new_dict)
 
         elements = {}
         for key, xpath in xpaths.items():
@@ -115,7 +122,7 @@ class GoogleMapsDataScraper:
         return elements
 
 
-    def scraperData(self, kw):
+    def scraperData(self, kw, para):
         try:
             self.log.info(f"Starting scraper for keyword: {kw}")
             time.sleep(3)
@@ -173,7 +180,7 @@ class GoogleMapsDataScraper:
                 name = child_div.get_attribute('aria-label')
                 # print(data)
                 child_div.click()
-                data[name] = self.fetch_data(name)
+                data[name] = self.fetch_data(name, para)
 
             print(data)
             return data

@@ -29,7 +29,7 @@ class mainGoogleMaps:
         try:
             for i in range(len(listthreads)):
                 listthreads[i] = Thread(target=self.scraperMaps, args=(
-                    divided[i], listresults, i,))
+                    divided[i], listresults, i))
                 listthreads[i].start()
         except Exception as e:
             logger.exception("Exception occurred", exc_info=True)
@@ -42,7 +42,7 @@ class mainGoogleMaps:
         for i in range(len(listresults)):
             listFinal = listFinal + listresults[i]
 
-        export = ExportDataMaps(filename, '', listFinal)
+        export = ExportDataMaps(filename, parameters, listFinal)
         export.exportExcel()
 
     def split_list(self,a, n):
@@ -58,7 +58,7 @@ class mainGoogleMaps:
         count = 1
         for l in list:
             # here we return the dictionories
-            Place = self.scraper.scraperData(l)
+            Place = self.scraper.scraperData(l, self.parameters)
             if (Place != None):
                 logger.error(f'Thread # {thread} {count}/{len(list)} - OK - {l}')
                 listPlaces.append(Place)
