@@ -43,9 +43,8 @@ class mainGoogleMaps:
             listFinal = listFinal + listresults[i]
         
         print(listFinal)
-        # return listFinal
-        # export = ExportDataMaps(filename, parameters, listFinal)
-        # export.exportExcel()
+        export = ExportDataMaps(filename, parameters, listFinal)
+        export.exportExcel()
 
     def split_list(self,a, n):
         k, m = divmod(len(a), n)

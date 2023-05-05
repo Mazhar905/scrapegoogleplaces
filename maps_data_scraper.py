@@ -120,12 +120,12 @@ class GoogleMapsDataScraper:
                     continue
                     #logger.exception("Exception occurred")
 
-        d = dict()
-        d[name]=elements
-        self.log.info(f"Element value of {name}\n-----------------------\n{d}.")
-        self.log.info(f"-----------------------\nInserting the value of {name} into excel file name is {filename}.")
-        export = ExportDataMaps(filename, para, d)
-        export.exportExcel()
+        # d = dict()
+        # d[name]=elements
+        self.log.info(f"Element value of {name}\n-----------------------\n.")
+        # self.log.info(f"-----------------------\nInserting the value of {name} into excel file name is {filename}.")
+        # export = ExportDataMaps(filename, para, d)
+        # export.exportExcel()
         return elements
 
 
