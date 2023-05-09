@@ -4,8 +4,8 @@ venv/*
 .vscode/*
 __pycache__/*
 Places locations.xlsx
-canadacities.csv
-canadacities.xlsx
+*.csv
+*.xlsx
 test.txt
 utils.py
 ResultOutput.xlsx
@@ -13,3 +13,5 @@ ResultOutput.xlsx
 testing.py
 *.xlsx
 *.XLSX
+*copy.py
+*.txt
